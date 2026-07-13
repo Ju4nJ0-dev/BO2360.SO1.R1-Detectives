@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Quizz - Detective de noticias - M1</title>
+  <meta name="description" content="Quiz interactivo tipo Kahoot con preguntas desde Google Sheets." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Quizz-M1" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Librería para el QR del facilitador (se cachea tras la 1ª carga con red) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ============ INICIO ============ -->
+    <section id="pantalla-inicio" class="pantalla activa">
+      <div class="inicio-card">
+        <img src="icons/Logo ABC.png" alt="Logo ABC" class="logo-inicio" />
+        <h1 class="titulo-app">Detective de noticias</h1>
+        <p class="subtitulo-app">Escribe el nombre de tu grupo y a jugar.</p>
+
+        <label class="campo">
+          <span class="campo-label">Nombre del grupo</span>
+          <input id="input-grupo" type="text" maxlength="40" placeholder="Ej: Pepeluchos" autocomplete="off" />
+        </label>
+
+        <button id="btn-empezar" class="btn btn-primario">Empezar</button>
+        <p id="estado-carga" class="estado-carga">Cargando preguntas…</p>
+        <p class="conteo-info"><b><span id="conteo-preguntas">0</span></b> preguntas en esta partida</p>
+
+        <button id="btn-facilitador" class="btn-facilitador" type="button">🛠️ Modo facilitador</button>
+      </div>
+      <footer class="pie">Desarrollado con 💜 por el equipo de ConexiónLab</footer>
+    </section>
+
+    <!-- ============ FACILITADOR ============ -->
+    <section id="pantalla-facilitador" class="pantalla">
+      <div class="fac-card">
+        <button class="cerrar-btn" id="btn-cerrar-facilitador" type="button" aria-label="Cerrar">✕</button>
+        <h1 class="fac-titulo">🛠️ Modo facilitador</h1>
+        <p class="fac-intro">Configura las preguntas desde tu Google Sheet y comparte el QR con los grupos.</p>
+
+        <div class="fac-seccion">
+          <h3>Paso 1 · Pega el link de tu Google Sheet</h3>
+          <p class="fac-nota">El Sheet debe estar compartido como <b>"Cualquier persona con el enlace — Lector"</b>.</p>
+          <input id="input-sheet-link" type="text" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off" spellcheck="false" />
+          <div class="fac-fila-botones">
+            <button id="btn-guardar-sheet" class="btn btn-primario chico" type="button">Guardar y cargar</button>
+            <button id="btn-restaurar-sheet" class="btn btn-secundario chico" type="button">Restaurar</button>
+          </div>
+          <p id="fuente-actual" class="fac-fuente"></p>
+          <div id="resultado-guardar" class="fac-resultado"></div>
+        </div>
+
+        <div class="fac-seccion">
+          <h3>Paso 2 · Comparte con los grupos</h3>
+          <p class="fac-nota">Escanean este QR y entran con tus preguntas cargadas.</p>
+          <div id="qr-code" class="qr-cont"></div>
+          <p class="url-label">Link del juego:</p>
+          <p id="url-compartible" class="url-compartible"></p>
+          <button id="btn-copiar-url" class="btn btn-secundario chico" type="button">Copiar link</button>
+          <div id="resultado-copiar" class="fac-resultado"></div>
+          <p class="game-url-info">URL base: <span id="game-url" class="mono"></span></p>
+        </div>
+<!--
+        <div class="fac-seccion fac-ayuda">
+          <h3>📋 Columnas del Sheet (hoja de preguntas)</h3>
+          <ol class="fac-lista">
+            <li><b>#</b> — ID numérico (solo se cargan filas con número aquí)</li>
+            <li><b>tipo</b> — <code>multiple</code> o <code>vf</code></li>
+            <li><b>detalle_pregunta</b> — el enunciado</li>
+            <li><b>imagen</b> — URL pública de imagen (opcional)</li>
+            <li><b>opcion_1 … opcion_4</b> — opciones (en <code>vf</code>: 1=Verdadero, 2=Falso)</li>
+            <li><b>respuesta_correcta</b> — el TEXTO de la opción correcta</li>
+            <li><b>tiempo</b> — segundos (opcional, def. 20)</li>
+            <li><b>puntos</b> — puntaje base (opcional, def. 1000)</li>
+            <li><b>retroalimentacion_correcta / _incorrecta</b> — mensajes (opcional)</li>
+          </ol>
+        </div>
+-->
+      </div>
+    </section>
+
+    <!-- ============ JUEGO ============ -->
+    <section id="pantalla-juego" class="pantalla">
+      <header class="hud">
+        <div class="hud-progreso"><span id="hud-num">1</span><span class="hud-sep">/</span><span id="hud-total">10</span></div>
+        <div id="hud-reloj" class="hud-reloj">
+          <svg viewBox="0 0 44 44" aria-hidden="true">
+            <circle class="reloj-fondo" cx="22" cy="22" r="19"></circle>
+            <circle id="reloj-aguja" class="reloj-aguja" cx="22" cy="22" r="19"></circle>
+          </svg>
+          <span id="reloj-num">20</span>
+        </div>
+        <div class="hud-puntos"><span id="hud-puntaje">0</span><span class="hud-puntos-label">pts</span></div>
+      </header>
+
+      <div class="pregunta-zona">
+        <figure id="pregunta-imagen-wrap" class="pregunta-imagen-wrap" hidden>
+          <img id="pregunta-imagen" alt="" />
+        </figure>
+        <h2 id="pregunta-texto" class="pregunta-texto">Pregunta</h2>
+      </div>
+
+      <div id="opciones" class="opciones"></div>
+
+      <div id="feedback" class="feedback" hidden>
+        <p id="feedback-icono" class="feedback-icono">✓</p>
+        <p id="feedback-texto" class="feedback-texto">¡Correcto!</p>
+        <p id="feedback-extra" class="feedback-extra" hidden></p>
+        <p id="feedback-puntos" class="feedback-puntos">+0</p>
+      </div>
+    </section>
+
+    <!-- ============ FINAL ============ -->
+    <section id="pantalla-final" class="pantalla">
+      <div class="final-card">
+        <p class="final-eyebrow">Resultado del grupo</p>
+        <h2 id="final-grupo" class="final-grupo">Grupo</h2>
+        <div class="final-puntaje">
+          <span id="final-puntaje-num">0</span>
+          <span class="final-puntaje-label">puntos</span>
+        </div>
+        <p id="final-aciertos" class="final-aciertos">0 de 0 correctas</p>
+
+        <button id="btn-enviar" class="btn btn-primario">Enviar puntaje</button>
+        <p id="estado-envio" class="estado-envio" hidden></p>
+
+        <div id="tabla-posiciones" class="tabla-posiciones" hidden>
+          <h3 class="tabla-titulo">Posiciones</h3>
+          <ol id="tabla-lista" class="tabla-lista"></ol>
+        </div>
+
+        <button id="btn-reiniciar" class="btn btn-secundario">Jugar de nuevo</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Modal de imagen ampliada -->
+  <div id="imagen-modal" class="img-modal" hidden>
+    <button id="img-modal-cerrar" class="img-modal-cerrar" aria-label="Cerrar">✕</button>
+    <img id="img-modal-foto" class="img-modal-foto" alt="" />
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

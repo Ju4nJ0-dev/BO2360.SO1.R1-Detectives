@@ -1,0 +1,4 @@
+#,tipo,detalle_pregunta,imagen,opcion_1,opcion_2,opcion_3,opcion_4,respuesta_correcta,tiempo,puntos,retroalimentacion_correcta,retroalimentacion_incorrecta
+1,multiple,¿Cuál es la sede de gobierno de Bolivia?,,La Paz,Sucre,Santa Cruz,Cochabamba,La Paz,20,1000,La Paz es la sede de gobierno.,La sede de gobierno es La Paz.
+2,vf,Una PWA puede funcionar sin conexión a internet.,,Verdadero,Falso,,,Verdadero,15,1000,¡Exacto! Por eso cacheamos el shell.,Sí puede: se cachea para uso offline.
+3,multiple,¿Qué debes hacer ante un mensaje de un desconocido que insiste?,https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/1x1.png/64px-1x1.png,Bloquear,Compartir mis datos,Responder enojado,Ignorar y seguir,Bloquear,25,1000,Bloquear corta el contacto.,Lo correcto es Bloquear.
