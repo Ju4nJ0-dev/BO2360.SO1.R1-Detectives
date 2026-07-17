@@ -545,3 +545,47 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('img-modal-cerrar').addEventListener('click', cerrar);
   modal.addEventListener('click', (e) => { if (e.target === modal) cerrar(); });
 });
+
+/* ===== Splash de 3 segundos al iniciar ===== */
+document.addEventListener('DOMContentLoaded', () => {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+  setTimeout(() => {
+    splash.classList.add('oculto');
+    setTimeout(() => splash.remove(), 400);
+  }, 2000);
+});
+
+/* ===== Botón "atrás" del celular: retrocede de pantalla en vez de cerrar la app ===== */
+(function () {
+  if (typeof cambiarPantalla !== 'function') return;
+  const original = cambiarPantalla;
+
+  // Estado base = pantalla de inicio
+  history.replaceState({ pantalla: 'pantalla-inicio' }, '');
+
+  // Envolvemos el cambio de pantalla para registrar el historial
+  cambiarPantalla = function (id) {
+    original(id);
+    // Solo "juego" y "facilitador" agregan una entrada (se puede retroceder de ellas).
+    const apilar = (id === 'pantalla-juego' || id === 'pantalla-facilitador');
+    if (apilar && (!history.state || history.state.pantalla !== id)) {
+      history.pushState({ pantalla: id }, '');
+    } else {
+      history.replaceState({ pantalla: id }, '');
+    }
+  };
+
+  // Al presionar "atrás": si el modal de imagen está abierto, ciérralo primero.
+  window.addEventListener('popstate', function (e) {
+    const modal = document.getElementById('imagen-modal');
+    if (modal && !modal.hidden) {
+      modal.hidden = true;
+      const activa = document.querySelector('.pantalla.activa');
+      history.pushState({ pantalla: activa ? activa.id : 'pantalla-inicio' }, '');
+      return;
+    }
+    const id = (e.state && e.state.pantalla) || 'pantalla-inicio';
+    original(id);
+  });
+})();

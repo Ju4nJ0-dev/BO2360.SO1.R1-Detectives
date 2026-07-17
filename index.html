@@ -24,18 +24,23 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+  <!-- Splash de inicio (3 segundos) -->
+  <div id="splash" class="splash">
+    <h1 class="splash-titulo">¿Verdad o falso? con Steve</h1>
+    <img src="icons/icon-192.png" alt="" class="splash-icono" />
+  </div>
   <div id="app">
 
     <!-- ============ INICIO ============ -->
     <section id="pantalla-inicio" class="pantalla activa">
       <div class="inicio-card">
         <img src="icons/Logo ABC.png" alt="Logo ABC" class="logo-inicio" />
-        <h1 class="titulo-app">Detective de noticias</h1>
-        <p class="subtitulo-app">Escribe el nombre de tu grupo y a jugar.</p>
+        <h1 class="titulo-app">¿Verdad o falso? con Steve</h1>
+        <p class="subtitulo-app">Con este cuestionario descubrirás las noticias digitales que son falsas y aquellas que son verdaderas.</p>
 
         <label class="campo">
-          <span class="campo-label">Nombre del grupo</span>
-          <input id="input-grupo" type="text" maxlength="40" placeholder="Ej: Pepeluchos" autocomplete="off" />
+          <span class="campo-label">Nombre del grupo:</span>
+          <input id="input-grupo" type="text" maxlength="40" placeholder="Ej: Steve caza noticias" autocomplete="off" />
         </label>
 
         <button id="btn-empezar" class="btn btn-primario">Empezar</button>

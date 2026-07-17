@@ -236,3 +236,17 @@ body { background: #ffffff; color: var(--tinta); }
   width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
   background: rgba(255,255,255,.18); color: #fff; font-size: 20px; display: grid; place-items: center;
 }
+
+/* ===== Splash de inicio (3 s) ===== */
+.splash {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  background: #ffffff;               /* mismo fondo que la app */
+  transition: opacity .4s ease;
+}
+.splash.oculto { opacity: 0; pointer-events: none; }
+.splash-titulo {
+  font-family: var(--fuente-display); font-weight: 700; color: var(--tinta);
+  font-size: clamp(1.8rem, 7vw, 2.6rem); margin: 0; text-align: center; padding: 0 20px;
+}
+.splash-icono { width: 120px; height: 120px; }

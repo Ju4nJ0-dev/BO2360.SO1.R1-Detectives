@@ -1,6 +1,6 @@
 {
-  "name": "Quizz - Detective de noticias - M1",
-  "short_name": "Quizz M1",
+  "name": "¿Verdad o falso? con Steve",
+  "short_name": "Steve",
   "description": "Quiz interactivo tipo Kahoot con preguntas desde Google Sheets",
   "start_url": ".",
   "scope": ".",
