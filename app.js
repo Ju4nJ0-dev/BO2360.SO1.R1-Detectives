@@ -15,7 +15,7 @@ const CONFIG = {
   DEFAULT_GID: '0',
 
   PISO_PUNTAJE: 1,   // un acierto da entre 50% y 100% de los puntos según rapidez = valores 0.5 para 50% y 1 para 100%
-  MS_FEEDBACK: 1800,   // cuánto se ve el ✓/✘ entre preguntas
+  MS_FEEDBACK: 3000,   // cuánto se ve el ✓/✘ entre preguntas
 
   LS_CONFIG: 'kahoot_sheet_config',
   LS_CACHE: 'kahoot_preguntas_',   // + sheetId_gid
