@@ -4,7 +4,7 @@
    - Google Sheets (CSV) y Apps Script: SIEMPRE red (nunca se cachean).
      El respaldo offline de las preguntas lo maneja app.js en localStorage.
 */
-const VERSION = 'kahoot-pwa-v1';
+const VERSION = 'kahoot-pwa-v3';
 const SHELL = [
   './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',

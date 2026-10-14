@@ -250,3 +250,91 @@ body { background: #ffffff; color: var(--tinta); }
   font-size: clamp(1.8rem, 7vw, 2.6rem); margin: 0; text-align: center; padding: 0 20px;
 }
 .splash-icono { width: 120px; height: 120px; }
+/* ===== Integrantes del grupo (hasta 7) ===== */
+.integrantes { text-align: left; margin-bottom: 20px; }
+.integrantes-cabecera { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.integrantes-contador { font-size: .8rem; font-weight: 600; color: var(--tinta-suave); padding-right: 4px; }
+.integrantes-lista { display: flex; flex-direction: column; gap: 8px; }
+.integrante-fila { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; align-items: center; }
+.integrante-fila input {
+  width: 100%; min-width: 0; font-family: var(--fuente-texto); font-size: 1rem; padding: 12px 14px;
+  border-radius: 12px; border: 1px solid #d7dae8; background: #fff; color: var(--carta-tinta);
+}
+.integrante-fila input:focus-visible { outline: 3px solid var(--acento); outline-offset: 1px; }
+.btn-quitar {
+  width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+  background: #eef0f6; color: #666; font-size: 14px;
+}
+.btn-quitar:hover { background: var(--mal); color: #fff; }
+.btn-agregar {
+  margin-top: 10px; width: 100%; padding: 11px; border-radius: 12px; cursor: pointer;
+  border: 1.5px dashed #c9cde0; background: transparent; color: var(--tinta);
+  font-family: var(--fuente-display); font-weight: 600; font-size: .95rem;
+}
+.btn-agregar:hover { border-color: var(--acento); }
+.btn-agregar[hidden] { display: none; }
+
+/* Integrantes en la pantalla de resultados */
+.final-integrantes {
+  list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+  margin: -8px 0 18px;
+}
+.final-integrantes li { background: #f0f1f7; color: var(--tinta); font-size: .85rem; padding: 5px 11px; border-radius: 999px; }
+
+/* Rótulo corto encima de la pregunta (columna Titulo_pregunta) */
+.pregunta-titulo {
+  display: inline-block; margin: 0 auto 10px; padding: 4px 14px; border-radius: 999px;
+  background: var(--acento); color: #201400;
+  font-family: var(--fuente-display); font-weight: 600; font-size: .95rem; letter-spacing: .02em;
+}
+.pregunta-titulo[hidden] { display: none; }
+
+/* ===== Responsividad ===== */
+
+/* Barra del sistema / notch: respeta el safe-area con un mínimo garantizado */
+#app {
+  padding-top: max(env(safe-area-inset-top), 16px);
+  padding-bottom: max(calc(16px + env(safe-area-inset-bottom)), 20px);
+}
+
+/* Inicio y resultados: crecen y hacen scroll sin cortarse por arriba.
+   (justify-content:center recorta cuando el contenido es más alto que la pantalla;
+    margin:auto centra cuando sobra espacio y deja empezar arriba cuando no.) */
+#pantalla-inicio, #pantalla-final { justify-content: flex-start; }
+.inicio-card, .final-card { margin-top: auto; margin-bottom: auto; }
+#pantalla-inicio .pie { margin-top: 0; }
+
+/* Pantalla de juego: todo en una pantalla, sin scroll */
+body.en-juego { overflow: hidden; }
+body.en-juego #app { height: 100dvh; min-height: 0; overflow: hidden; }
+#pantalla-juego { min-height: 0; overflow: hidden; }
+.hud { flex: 0 0 auto; padding: 4px 2px 12px; }
+
+.pregunta-zona {
+  flex: 1 1 auto; min-height: 0; margin-bottom: 16px;   /* espacio entre pregunta y botones */
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.pregunta-zona > * { flex-shrink: 0; }
+.pregunta-imagen-wrap { flex-shrink: 1; min-height: 0; width: 100%; margin-bottom: 12px; }
+.pregunta-imagen-wrap img { max-height: min(260px, 30vh); width: 100%; }
+.pregunta-texto {
+  width: 100%;
+  font-size: clamp(1.05rem, min(5vw, 3.2vh), 1.75rem);
+  padding: clamp(12px, 2vh, 20px) 18px;
+}
+
+/* Botones anclados abajo, tamaño fijo cómodo */
+.opciones { flex: 0 0 auto; margin-top: 0; }
+.opcion { min-height: 0; height: clamp(64px, 10vh, 84px); padding: 10px 14px; overflow: hidden; }
+.opciones.vf .opcion { min-height: 0; height: clamp(80px, 13vh, 110px); }
+
+/* Pantallas bajas: se compacta el marcador y el texto */
+@media (max-height: 640px) {
+  .hud-reloj { width: 48px; height: 48px; }
+  .hud-progreso { font-size: 1.05rem; padding: 6px 12px; }
+  .hud-puntos span:first-child { font-size: 1.25rem; }
+  .pregunta-titulo { margin-bottom: 6px; font-size: .85rem; }
+}
+@media (max-width: 380px) { .opcion { font-size: .95rem; } }
+#btn-reiniciar { margin-top: 18px; }

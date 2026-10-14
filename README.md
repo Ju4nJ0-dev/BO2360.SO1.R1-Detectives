@@ -29,6 +29,7 @@ un **número** en la columna `#`.
 |---|:--:|---|
 | `#` | ✅ | ID numérico de la pregunta (1, 2, 3…). Sin número → la fila se ignora. |
 | `tipo` | ✅ | `multiple` (opción múltiple) o `vf` (verdadero/falso). |
+| `Titulo_pregunta` | ⬜ | Rótulo corto encima de la pregunta (ej. "Escena 1"). Vacío = no se muestra. |
 | `detalle_pregunta` | ✅ | El enunciado de la pregunta. |
 | `imagen` | ⬜ | **URL pública** de una imagen. Si está vacía, la pregunta va sin imagen. |
 | `opcion_1` | ✅ | Primera opción. En `vf`: *Verdadero*. |
@@ -57,11 +58,14 @@ rol **Lector**. (Necesario para que el navegador pueda leer el CSV.)
 Cuando un grupo envía su puntaje, el script crea (si no existe) la hoja
 **`Resultados`** con estas columnas:
 
-| fecha | grupo | puntaje | correctas | total |
-|---|---|---|---|---|
+| fecha | grupo | integrantes | puntaje | correctas | total | P1 | P2 | … | Pn |
+|---|---|---|---|---|---|---|---|---|---|
 
-`fecha` es la **fecha y hora de envío** de ese grupo. Así queda el registro de
-qué grupo jugó, cuándo y con cuánto puntaje.
+`fecha` es la **fecha y hora de envío** de ese grupo. `integrantes` lleva los
+nombres y apellidos separados por coma (hasta 7). Cada `Pn` es el puntaje que el
+grupo sacó en la pregunta con `#` = n; esas columnas se crean solas a medida que
+aparecen preguntas. Si la hoja `Resultados` ya existía con el formato anterior,
+el script inserta la columna `integrantes` sin mover lo que ya estaba guardado.
 
 ## 2) Publicar el Apps Script (para guardar puntajes)
 
@@ -72,6 +76,9 @@ qué grupo jugó, cuándo y con cuánto puntaje.
 3. Autoriza los permisos. Copia la **URL /exec**.
 4. Abre `app.js` y pega esa URL en `CONFIG.SCRIPT_URL`.
 
+Si actualizas el `Codigo.gs`, crea una **implementación nueva** (no edites la
+vieja) y reemplaza la URL en `SCRIPT_URL`.
+
 Si dejas `SCRIPT_URL` sin configurar, el juego funciona igual pero no guardará
 puntajes (te avisará al intentar enviar).
 
@@ -79,7 +86,7 @@ puntajes (te avisará al intentar enviar).
 
 Dos maneras (ambas del estilo de tu Runner):
 
-- **Rápida:** abre el juego, entra a **🛠️ Modo facilitador**, pega el link de tu
+- **Rápida:** abre el enlace del juego agregando **`/#facilitador`** al final (por ejemplo `https://tu-sitio.netlify.app/#facilitador`). No hay botón visible, así los estudiantes no lo encuentran. Ahí pega el link de tu
   Sheet, *Guardar y cargar*. Se genera un **QR**; los grupos lo escanean y entran
   con tus preguntas ya cargadas (viaja en la URL como `?sheet=ID`).
 - **Fija:** cambia `CONFIG.DEFAULT_SHEET_ID` (y `DEFAULT_GID`) en `app.js` por los
@@ -116,7 +123,9 @@ python3 -m http.server 8000   # y abre http://localhost:8000
   guardado en ese dispositivo o el predeterminado. Para repartir Sheets distintos
   por grupo, usa el QR en el navegador (no instalado).
 - Si cambias archivos, sube la versión del cache en `sw.js`
-  (`kahoot-pwa-v2`) para forzar actualización en dispositivos ya instalados.
+  (ahora va en `kahoot-pwa-v3`; la próxima sería `-v4`) y sube `styles.css`,
+  `app.js` **y** `sw.js` juntos. Si no, los celulares con la PWA instalada siguen
+  viendo la versión vieja por el caché.
 - El `SCRIPT_URL` es único (uno tuyo). El puntaje se guarda en el **mismo Sheet**
   del que salieron las preguntas, porque el script abre ese Sheet por su ID.
   Requisito: tu cuenta (dueña del script) debe tener acceso de edición a ese Sheet.

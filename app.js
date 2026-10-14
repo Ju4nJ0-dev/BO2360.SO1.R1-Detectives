@@ -19,7 +19,9 @@ const CONFIG = {
 
   LS_CONFIG: 'kahoot_sheet_config',
   LS_CACHE: 'kahoot_preguntas_',   // + sheetId_gid
-  LS_COLA: 'kahoot_cola_envios'
+  LS_COLA: 'kahoot_cola_envios',
+
+  MAX_INTEGRANTES: 7
 };
 
 /* Formas/colores clásicos por posición de opción */
@@ -32,7 +34,7 @@ const FORMAS = {
 };
 
 const estado = {
-  grupo: '', config: null,
+  grupo: '', integrantes: [], config: null,
   preguntas: [], indice: 0,
   puntaje: 0, correctas: 0, detalle: [],
   temporizador: null, tiempoTotal: 20, tiempoRestante: 20, respondida: false
@@ -156,7 +158,7 @@ function listo(estadoEl, btn, n, offline) {
 
 /* Convierte filas del CSV al formato del quiz.
    Columnas (por nombre, orden libre):
-   # | tipo | detalle_pregunta | imagen | opcion_1..4 |
+   # | tipo | Titulo_pregunta | detalle_pregunta | imagen | opcion_1..4 |
    respuesta_correcta | tiempo | puntos |
    retroalimentacion_correcta | retroalimentacion_incorrecta            */
 function mapearPreguntas(filas) {
@@ -166,6 +168,7 @@ function mapearPreguntas(filas) {
 
   const iId = col('#');
   const iTipo = col('tipo');
+  const iTitulo = col('titulo_pregunta');
   const iPreg = col('detalle_pregunta');
   const iImg = col('imagen');
   const iOp = [col('opcion_1'), col('opcion_2'), col('opcion_3'), col('opcion_4')];
@@ -205,6 +208,7 @@ function mapearPreguntas(filas) {
     out.push({
       id: parseInt(rawId, 10),
       tipo,
+      titulo: get(fila, iTitulo),
       pregunta: get(fila, iPreg),
       imagen: get(fila, iImg),
       opciones,
@@ -219,6 +223,44 @@ function mapearPreguntas(filas) {
 }
 
 /* ---------------------------------------------------------------------
+   Integrantes del grupo (hasta CONFIG.MAX_INTEGRANTES, nombre y apellido)
+   --------------------------------------------------------------------- */
+function agregarIntegrante() {
+  const lista = $('integrantes-lista');
+  if (lista.children.length >= CONFIG.MAX_INTEGRANTES) return;
+  const fila = document.createElement('div');
+  fila.className = 'integrante-fila';
+  fila.innerHTML =
+    '<input type="text" class="int-nombre" maxlength="30" placeholder="Nombre" autocomplete="off" />' +
+    '<input type="text" class="int-apellido" maxlength="30" placeholder="Apellido" autocomplete="off" />' +
+    '<button type="button" class="btn-quitar" aria-label="Quitar integrante">✕</button>';
+  fila.querySelector('.btn-quitar').addEventListener('click', () => {
+    fila.remove();
+    if (!lista.children.length) agregarIntegrante();
+    actualizarContador();
+  });
+  lista.appendChild(fila);
+  actualizarContador();
+  return fila;
+}
+
+function actualizarContador() {
+  const n = $('integrantes-lista').children.length;
+  $('integrantes-contador').textContent = `${n} de ${CONFIG.MAX_INTEGRANTES}`;
+  $('btn-agregar-integrante').hidden = n >= CONFIG.MAX_INTEGRANTES;
+  // Con una sola fila no tiene sentido quitarla
+  document.querySelectorAll('.integrante-fila .btn-quitar')
+    .forEach((b) => { b.style.visibility = n > 1 ? 'visible' : 'hidden'; });
+}
+
+function leerIntegrantes() {
+  return [...document.querySelectorAll('.integrante-fila')]
+    .map((f) => [f.querySelector('.int-nombre').value.trim(), f.querySelector('.int-apellido').value.trim()]
+      .filter(Boolean).join(' '))
+    .filter(Boolean);
+}
+
+/* ---------------------------------------------------------------------
    Flujo del juego
    --------------------------------------------------------------------- */
 function empezar() {
@@ -226,6 +268,7 @@ function empezar() {
   if (!nombre) { $('input-grupo').focus(); return; }
   if (!estado.preguntas.length) return;
   estado.grupo = nombre;
+  estado.integrantes = leerIntegrantes();
   estado.indice = 0; estado.puntaje = 0; estado.correctas = 0; estado.detalle = [];
   cambiarPantalla('pantalla-juego');
   mostrarPregunta();
@@ -239,6 +282,9 @@ function mostrarPregunta() {
   $('hud-total').textContent = estado.preguntas.length;
   $('hud-puntaje').textContent = estado.puntaje;
   $('pregunta-texto').textContent = p.pregunta;
+  const tit = $('pregunta-titulo');
+  tit.textContent = p.titulo || '';
+  tit.hidden = !p.titulo;
 
   const wrap = $('pregunta-imagen-wrap');
   const img = $('pregunta-imagen');
@@ -338,6 +384,9 @@ function mostrarFeedback(acierto, puntos, seAcabo, p) {
 
 function terminar() {
   $('final-grupo').textContent = estado.grupo;
+  const ul = $('final-integrantes');
+  ul.innerHTML = estado.integrantes.map((n) => `<li>${escapar(n)}</li>`).join('');
+  ul.hidden = !estado.integrantes.length;
   $('final-puntaje-num').textContent = estado.puntaje;
   $('final-aciertos').textContent = `${estado.correctas} de ${estado.preguntas.length} correctas`;
   $('estado-envio').hidden = true;
@@ -364,9 +413,12 @@ async function enviarResultado() {
   const payload = {
     sheetId: estado.config ? estado.config.id : '',
     grupo: estado.grupo,
+    integrantes: estado.integrantes.join(', '),
     puntaje: estado.puntaje,
     correctas: estado.correctas,
     total: estado.preguntas.length,
+    // Puntaje por pregunta: { "1": 10, "2": 0, ... } → columnas P1, P2… en el Sheet
+    porPregunta: Object.fromEntries(estado.detalle.map((d) => [String(d.id), d.puntos])),
     detalle: estado.detalle
   };
 
@@ -495,6 +547,7 @@ function copiarUrl() {
 function cambiarPantalla(id) {
   document.querySelectorAll('.pantalla').forEach((p) => p.classList.remove('activa'));
   $(id).classList.add('activa');
+  document.body.classList.toggle('en-juego', id === 'pantalla-juego');
   window.scrollTo(0, 0);
 }
 
@@ -519,10 +572,15 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarPreguntas();
   reintentarCola();
 
+  agregarIntegrante();
+  $('btn-agregar-integrante').addEventListener('click', () => {
+    const f = agregarIntegrante();
+    if (f) f.querySelector('.int-nombre').focus();
+  });
+
   $('btn-empezar').addEventListener('click', empezar);
   $('input-grupo').addEventListener('keydown', (e) => { if (e.key === 'Enter') empezar(); });
-  $('btn-facilitador').addEventListener('click', abrirFacilitador);
-  $('btn-cerrar-facilitador').addEventListener('click', () => cambiarPantalla('pantalla-inicio'));
+  $('btn-cerrar-facilitador').addEventListener('click', cerrarFacilitador);
   $('btn-guardar-sheet').addEventListener('click', guardarSheet);
   $('btn-restaurar-sheet').addEventListener('click', restaurarSheet);
   $('btn-copiar-url').addEventListener('click', copiarUrl);
@@ -530,7 +588,25 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-reiniciar').addEventListener('click', () => location.reload());
 
   window.addEventListener('online', reintentarCola);
+
+  // Modo facilitador: solo por enlace (/#facilitador o ?facilitador), sin botón visible.
+  if (pideFacilitador()) abrirFacilitador();
+  window.addEventListener('hashchange', () => { if (pideFacilitador()) abrirFacilitador(); });
 });
+
+function pideFacilitador() {
+  return location.hash === '#facilitador' || new URLSearchParams(location.search).has('facilitador');
+}
+
+/* Al cerrar se limpia #facilitador / ?facilitador del enlace, para que al recargar
+   o al instalar la PWA desde ahí no vuelva a abrirse el modo facilitador. */
+function cerrarFacilitador() {
+  cambiarPantalla('pantalla-inicio');
+  const params = new URLSearchParams(location.search);
+  params.delete('facilitador');
+  const qs = params.toString();
+  history.replaceState(history.state, '', location.pathname + (qs ? '?' + qs : ''));
+}
 
 /* ===== Modal para ver la imagen completa ===== */
 document.addEventListener('DOMContentLoaded', () => {

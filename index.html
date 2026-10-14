@@ -43,11 +43,18 @@
           <input id="input-grupo" type="text" maxlength="40" placeholder="Ej: Steve caza noticias" autocomplete="off" />
         </label>
 
+        <div class="integrantes">
+          <div class="integrantes-cabecera">
+            <span class="campo-label">Integrantes del grupo:</span>
+            <span id="integrantes-contador" class="integrantes-contador">1 de 7</span>
+          </div>
+          <div id="integrantes-lista" class="integrantes-lista"></div>
+          <button id="btn-agregar-integrante" class="btn-agregar" type="button">+ Agregar integrante</button>
+        </div>
+
         <button id="btn-empezar" class="btn btn-primario">Empezar</button>
         <p id="estado-carga" class="estado-carga">Cargando preguntas…</p>
         <p class="conteo-info"><b><span id="conteo-preguntas">0</span></b> preguntas en esta partida</p>
-
-        <button id="btn-facilitador" class="btn-facilitador" type="button">🛠️ Modo facilitador</button>
       </div>
       <footer class="pie">Desarrollado con 💜 por el equipo de ConexiónLab</footer>
     </section>
@@ -87,6 +94,7 @@
           <ol class="fac-lista">
             <li><b>#</b> — ID numérico (solo se cargan filas con número aquí)</li>
             <li><b>tipo</b> — <code>multiple</code> o <code>vf</code></li>
+            <li><b>Titulo_pregunta</b> — rótulo corto sobre la pregunta (opcional, ej. "Escena 1")</li>
             <li><b>detalle_pregunta</b> — el enunciado</li>
             <li><b>imagen</b> — URL pública de imagen (opcional)</li>
             <li><b>opcion_1 … opcion_4</b> — opciones (en <code>vf</code>: 1=Verdadero, 2=Falso)</li>
@@ -115,6 +123,7 @@
       </header>
 
       <div class="pregunta-zona">
+        <p id="pregunta-titulo" class="pregunta-titulo" hidden></p>
         <figure id="pregunta-imagen-wrap" class="pregunta-imagen-wrap" hidden>
           <img id="pregunta-imagen" alt="" />
         </figure>
@@ -136,6 +145,7 @@
       <div class="final-card">
         <p class="final-eyebrow">Resultado del grupo</p>
         <h2 id="final-grupo" class="final-grupo">Grupo</h2>
+        <ul id="final-integrantes" class="final-integrantes" hidden></ul>
         <div class="final-puntaje">
           <span id="final-puntaje-num">0</span>
           <span class="final-puntaje-label">puntos</span>
